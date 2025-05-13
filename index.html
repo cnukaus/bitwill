@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bitcoin Escrow Web App</title>
+</head>
+<body>
+    <h1>Create Bitcoin Escrow Transaction</h1>
+    <form id="escrow-form">
+        <label>Party 1 Nostr Public Key:</label><br>
+        <input type="text" id="npub_1" required><br>
+        <label>Party 2 Nostr Public Key:</label><br>
+        <input type="text" id="npub_2" required><br>
+        <label>Arbitrator Nostr Public Key (optional):</label><br>
+        <input type="text" id="npub_arbitrator"><br>
+        <label>Timelock Duration (blocks, optional):</label><br>
+        <input type="number" id="timelock_duration"><br>
+        <label>Escrow Script Type:</label><br>
+        <select id="escrow_script" required>
+            <option value="A">A (2-of-2 Multisig)</option>
+            <option value="B">B (2-of-3 with Party 1)</option>
+            <option value="C">C (2-of-3 with Party 2)</option>
+        </select><br>
+        <label>Funding TXID:</label><br>
+        <input type="text" id="funding_txid" required><br>
+        <label>Funding Vout:</label><br>
+        <input type="number" id="funding_vout" required><br>
+        <label>Amount (satoshis):</label><br>
+        <input type="number" id="amount" required><br>
+        <label>Private Key (for signing, demo only):</label><br>
+        <input type="text" id="private_key" required><br>
+        <button type="submit">Create and Broadcast Transaction</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('escrow-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = {
+                escrow_input: {
+                    npub_1: document.getElementById('npub_1').value,
+                    npub_2: document.getElementById('npub_2').value,
+                    npub_arbitrator: document.getElementById('npub_arbitrator').value || null,
+                    timelock_duration: parseInt(document.getElementById('timelock_duration').value) || null,
+                    escrow_script: document.getElementById('escrow_script').value,
+                },
+                funding_txid: document.getElementById('funding_txid').value,
+                funding_vout: parseInt(document.getElementById('funding_vout').value),
+                amount: parseInt(document.getElementById('amount').value),
+                private_key: document.getElementById('private_key').value,
+            };
+
+            const response = await fetch('http://127.0.0.1:8080/create_escrow_tx', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(input),
+            });
+            const result = await response.json();
+            document.getElementById('result').innerHTML = result.error
+                ? `Error: ${result.error}`
+                : `Transaction broadcasted! TXID: ${result.txid}`;
+        });
+    </script>
+</body>
+</html>

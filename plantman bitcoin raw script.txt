@@ -1,0 +1,12 @@
+and_v(
+    after(4326153),
+    sha256(79c0198ac27c52e56323db0f5ab0ff7fa090257263049748793babd18c07e9c7)
+)
+
+
+don't keep me as a plantman
+
+tr(,and_v(v:after(4326153),sha256(79c0198ac27c52e56323db0f5ab0ff7fa090257263049748793babd18c07e9c7)))
+
+
+#https://bitcoinerlab.com/modules/miniscript example scripts

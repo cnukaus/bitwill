@@ -3,11 +3,21 @@ use bitcoin::blockdata::script::Script;
 use bitcoin::network::constants::Network;
 use bitcoin::util::address::Address;
 use bitcoin::util::psbt::PartiallySignedTransaction;
-use bitcoin_rpc_client::{BitcoinCoreClient,};// Auth}; // Use a crate like `bitcoin-rpc-client`
+use bitcoin_rpc_client::{BitcoinCoreClient, Auth};
 use std::env;
 use bitcoin::consensus::encode::serialize;
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use dotenv::dotenv;
+use std::str::FromStr;
+
+#[derive(Deserialize)]
+struct EscrowInput {
+    npub_1: String,
+    npub_2: String,
+    npub_arbitrator: String,
+}
+
 #[derive(Deserialize)]
 struct CreateEscrowTxInput {
     escrow_input: EscrowInput,
@@ -23,11 +33,10 @@ struct CreateEscrowTxOutput {
     error: Option<String>,
 }
 
-
 // Endpoint to create and broadcast escrow transaction
 async fn create_escrow_tx(input: web::Json<CreateEscrowTxInput>) -> HttpResponse {
-    // Generate escrow script
-    dotenv!().ok()
+    dotenv().ok();
+
     let escrow_input = &input.escrow_input;
     let npub_1 = match NostrPublicKey::from_str(&escrow_input.npub_1) {
         Ok(key) => key,
@@ -36,12 +45,24 @@ async fn create_escrow_tx(input: web::Json<CreateEscrowTxInput>) -> HttpResponse
             error: Some(format!("Invalid npub_1: {}", e)),
         }),
     };
-    // ... (similar parsing for npub_2, npub_arbitrator, etc.)
-    
-    let escrow_script = match escrow_scripts(
-        &npub_1,
-        // ... other params
-    ) {
+
+    let npub_2 = match NostrPublicKey::from_str(&escrow_input.npub_2) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::BadRequest().json(CreateEscrowTxOutput {
+            txid: "".to_string(),
+            error: Some(format!("Invalid npub_2: {}", e)),
+        }),
+    };
+
+    let npub_arbitrator = match NostrPublicKey::from_str(&escrow_input.npub_arbitrator) {
+        Ok(key) => key,
+        Err(e) => return HttpResponse::BadRequest().json(CreateEscrowTxOutput {
+            txid: "".to_string(),
+            error: Some(format!("Invalid npub_arbitrator: {}", e)),
+        }),
+    };
+
+    let escrow_script = match escrow_scripts(&npub_1, &npub_2, &npub_arbitrator) {
         Ok(script) => script,
         Err(e) => return HttpResponse::BadRequest().json(CreateEscrowTxOutput {
             txid: "".to_string(),
@@ -69,11 +90,15 @@ async fn create_escrow_tx(input: web::Json<CreateEscrowTxInput>) -> HttpResponse
         }],
     };
 
-    // Connect to Bitcoin node
-    let rpc_url = env::var("RPC_BTC").to_string();
-    let client = match BitcoinCoreClient::new(
-        &rpc_url,
-    ) {
+    let rpc_url = match env::var("RPC_BTC") {
+        Ok(url) => url,
+        Err(_) => return HttpResponse::InternalServerError().json(CreateEscrowTxOutput {
+            txid: "".to_string(),
+            error: Some("RPC_BTC environment variable not set".to_string()),
+        }),
+    };
+
+    let client = match BitcoinCoreClient::new(&rpc_url, Auth::UserPass("youruser".to_string(), "yourpassword".to_string())) {
         Ok(client) => client,
         Err(e) => return HttpResponse::InternalServerError().json(CreateEscrowTxOutput {
             txid: "".to_string(),

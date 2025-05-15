@@ -3,13 +3,13 @@ use bitcoin::blockdata::script::Script;
 use bitcoin::network::constants::Network;
 use bitcoin::util::address::Address;
 use bitcoin::util::psbt::PartiallySignedTransaction;
-use bitcoin_rpc_client::{BitcoinCoreClient, Auth};
 use std::env;
 use bitcoin::consensus::encode::serialize;
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use dotenv::dotenv;
 use std::str::FromStr;
+use bitcoincore_rpc::{Auth, Client, RpcApi};
 
 #[derive(Deserialize)]
 struct EscrowInput {
@@ -98,7 +98,7 @@ async fn create_escrow_tx(input: web::Json<CreateEscrowTxInput>) -> HttpResponse
         }),
     };
 
-    let client = match BitcoinCoreClient::new(&rpc_url, Auth::UserPass("youruser".to_string(), "yourpassword".to_string())) {
+    let client = match Client::new(&rpc_url, Auth::UserPass("youruser".to_string(), "yourpassword".to_string())) {
         Ok(client) => client,
         Err(e) => return HttpResponse::InternalServerError().json(CreateEscrowTxOutput {
             txid: "".to_string(),

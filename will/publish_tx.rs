@@ -3,7 +3,7 @@ use bitcoin::blockdata::script::Script;
 use bitcoin::network::constants::Network;
 use bitcoin::util::address::Address;
 use bitcoin::util::psbt::PartiallySignedTransaction;
-use bitcoin_rpc_client::{BitcoinCoreClient, Auth}; // Use a crate like `bitcoin-rpc-client`
+use bitcoincore_rpc::{Auth, Client, RpcApi};
 
 #[derive(Deserialize)]
 struct CreateEscrowTxInput {
@@ -65,7 +65,7 @@ async fn create_escrow_tx(input: web::Json<CreateEscrowTxInput>) -> HttpResponse
     };
 
     // Connect to Bitcoin node
-    let client = match BitcoinCoreClient::new(
+    let client = match Client::new(
         "http://localhost:8332".to_string(),
         Auth::UserPass("youruser".to_string(), "yourpassword".to_string()),
     ) {

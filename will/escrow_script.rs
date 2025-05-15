@@ -3,8 +3,11 @@ use bitcoin::blockdata::script::Script;
 use bitcoin::network::constants::Network;
 use bitcoin::util::address::Address;
 use bitcoin::util::psbt::PartiallySignedTransaction;
-use bitcoin_rpc_client::{BitcoinCoreClient, Auth}; // Use a crate like `bitcoin-rpc-client`
-
+use bitcoin_rpc_client::{BitcoinCoreClient,};// Auth}; // Use a crate like `bitcoin-rpc-client`
+use std::env;
+use bitcoin::consensus::encode::serialize;
+use actix_web::{web, HttpResponse, Responder};
+use serde::{Deserialize, Serialize};
 #[derive(Deserialize)]
 struct CreateEscrowTxInput {
     escrow_input: EscrowInput,
@@ -20,9 +23,11 @@ struct CreateEscrowTxOutput {
     error: Option<String>,
 }
 
+
 // Endpoint to create and broadcast escrow transaction
 async fn create_escrow_tx(input: web::Json<CreateEscrowTxInput>) -> HttpResponse {
     // Generate escrow script
+    dotenv!().ok()
     let escrow_input = &input.escrow_input;
     let npub_1 = match NostrPublicKey::from_str(&escrow_input.npub_1) {
         Ok(key) => key,
@@ -65,9 +70,9 @@ async fn create_escrow_tx(input: web::Json<CreateEscrowTxInput>) -> HttpResponse
     };
 
     // Connect to Bitcoin node
+    let rpc_url = env::var("RPC_BTC").to_string();
     let client = match BitcoinCoreClient::new(
-        "http://localhost:8332".to_string(),
-        Auth::UserPass("youruser".to_string(), "yourpassword".to_string()),
+        &rpc_url,
     ) {
         Ok(client) => client,
         Err(e) => return HttpResponse::InternalServerError().json(CreateEscrowTxOutput {

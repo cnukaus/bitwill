@@ -1,0 +1,17 @@
+[package]
+name = "my-crate"
+version = "0.2.2"
+
+[dependencies]
+actix-web = "4"
+bitcoin = "0.29"
+serde = { version = "1.0", features = ["derive"] }
+hex = "0.4"
+
+[[bin]]
+name = "escrow_script"
+path = "escrow_script.rs"
+
+[[bin]]
+name = "publish_tx"
+path = "publish_tx.rs"

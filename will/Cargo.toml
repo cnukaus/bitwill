@@ -7,6 +7,10 @@ actix-web = "4"
 bitcoin = "0.29"
 serde = { version = "1.0", features = ["derive"] }
 hex = "0.4"
+rhai = "1.16"  # For custom formula evaluation
+chrono = "0.4"  # For date handling
+serde_json = "1.0"  # For JSON serialization
+thiserror = "1.0"  # For error handling
 
 [[bin]]
 name = "escrow_script"
@@ -15,3 +19,11 @@ path = "escrow_script.rs"
 [[bin]]
 name = "publish_tx"
 path = "publish_tx.rs"
+
+[[bin]]
+name = "spending"
+path = "spending.rs"
+
+[[bin]]
+name = "web_server"
+path = "web_server.rs"

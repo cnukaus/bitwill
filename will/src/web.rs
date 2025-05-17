@@ -1,6 +1,7 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use crate::spending::{UserModel, ProjectSpend, GrowthType};
+use std::env;
 
 #[derive(Deserialize)]
 pub struct CreateProjectRequest {
@@ -103,7 +104,16 @@ async fn calculate_projection(user_id: web::Path<String>) -> impl Responder {
 }
 
 pub async fn run_server() -> std::io::Result<()> {
-    println!("Starting web server at http://localhost:8080");
+    // Get port from environment variable or use default
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse::<u16>()
+        .unwrap_or(8080);
+    
+    let host = env::var("HOST")
+        .unwrap_or_else(|_| "127.0.0.1".to_string());
+    
+    println!("Starting web server at http://{}:{}", host, port);
     
     HttpServer::new(|| {
         App::new()
@@ -111,7 +121,7 @@ pub async fn run_server() -> std::io::Result<()> {
             .route("/users/{user_id}/projects", web::post().to(add_project))
             .route("/users/{user_id}/projection", web::get().to(calculate_projection))
     })
-    .bind("127.0.0.1:8080")?
+    .bind(format!("{}:{}", host, port))?
     .run()
     .await
 } 

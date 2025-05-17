@@ -2,6 +2,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use crate::spending::{UserModel, ProjectSpend, GrowthType};
 use std::env;
+use actix_cors::Cors;
 
 #[derive(Deserialize)]
 pub struct CreateProjectRequest {
@@ -103,6 +104,10 @@ async fn calculate_projection(user_id: web::Path<String>) -> impl Responder {
     }
 }
 
+async fn index() -> impl Responder {
+    HttpResponse::Ok().body("Welcome to the Projection API! Use /users to create a new user.")
+}
+
 pub async fn run_server() -> std::io::Result<()> {
     // Get port from environment variable or use default
     let port = env::var("PORT")
@@ -111,12 +116,20 @@ pub async fn run_server() -> std::io::Result<()> {
         .unwrap_or(8080);
     
     let host = env::var("HOST")
-        .unwrap_or_else(|_| "127.0.0.1".to_string());
+        .unwrap_or_else(|_| "0.0.0.0".to_string());
     
     println!("Starting web server at http://{}:{}", host, port);
     
     HttpServer::new(|| {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header()
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
+            .route("/", web::get().to(index))
             .route("/users", web::post().to(create_user))
             .route("/users/{user_id}/projects", web::post().to(add_project))
             .route("/users/{user_id}/projection", web::get().to(calculate_projection))

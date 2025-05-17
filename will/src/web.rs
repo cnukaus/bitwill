@@ -62,8 +62,11 @@ async fn add_project(
 }
 
 async fn calculate_projection(user_id: web::Path<String>) -> impl Responder {
+    // Extract the String from Path
+    let user_id = user_id.into_inner();
+    
     // In a real application, you'd fetch the user from a database
-    let mut user = match UserModel::new(user_id.into(), 5) {
+    let mut user = match UserModel::new(user_id, 5) {
         Ok(u) => u,
         Err(e) => return HttpResponse::BadRequest().body(e.to_string()),
     };

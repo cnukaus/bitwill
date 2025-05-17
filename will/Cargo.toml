@@ -1,6 +1,7 @@
 [package]
 name = "my-crate"
 version = "0.2.2"
+edition = "2021"
 
 [dependencies]
 actix-web = "4"
@@ -11,19 +12,12 @@ rhai = "1.16"  # For custom formula evaluation
 chrono = "0.4"  # For date handling
 serde_json = "1.0"  # For JSON serialization
 thiserror = "1.0"  # For error handling
-
-[[bin]]
-name = "escrow_script"
-path = "escrow_script.rs"
-
-[[bin]]
-name = "publish_tx"
-path = "publish_tx.rs"
-
-[[bin]]
-name = "spending"
-path = "spending.rs"
+image = "0.24"  # For creating illustrations
 
 [[bin]]
 name = "web_server"
-path = "web_server.rs"
+path = "src/bin/web_server.rs"
+
+[[bin]]
+name = "symbiosis_art"
+path = "src/bin/symbiosis_art.rs"

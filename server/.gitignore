@@ -1,0 +1,4 @@
+# Never commit collected personal data
+data/
+*.jsonl
+node_modules/

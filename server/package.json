@@ -1,0 +1,13 @@
+{
+  "name": "bitcoin-legacy-kit-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal zero-dependency backend for the Bitcoin Legacy Kit gift form.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
